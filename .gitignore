@@ -1,0 +1,33 @@
+# ---- personal data: never commit (public repo) ----
+AGENT_BRIEF.md
+applied_log.jsonl
+candidates.json
+extra_candidates.json
+today_queue.json
+seen.json
+job_meta.json
+running.json
+chrome_sites.json
+yc_slugs.json
+discovery_*.md
+digests/
+batches/
+PAUSED
+*.pdf
+resume_b64.txt
+tracker/data.json
+tracker/gmail_status.json
+tracker/.password
+tracker/.resume_link.json
+tracker/*.bak
+prompts/*_AGENT*.md
+prompts/FINISH_DRAFTS.md
+prompts/WELLFOUND_BATCH.md
+# ---- secrets / local ----
+.env
+.env.*
+*.key
+__pycache__/
+*.pyc
+.DS_Store
+!prompts/EXAMPLE_AGENT.md
