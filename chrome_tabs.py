@@ -26,7 +26,7 @@ ATS_HOSTS = ("oraclecloud.com", "myworkdayjobs.com", "myworkdaysite.com", "succe
              "recruitee.com", "talemetry.com", "jobvite.com", "pinpointhq.com", "docs.google.com", "linkedin.com", "indeed.com",
              "wellfound.com", "naukri.com", "himalayas.app")
 HELPER = ("127.0.0.1:8787/go", "linkedin.com/talentwidgets", "about:blank")
-DONE_URL = (r"/jobTasks/completed/application", r"mode=submit_apply", r"docs\.google\.com/forms/.*/formResponse",
+DONE_URL = (r"/jobTasks/completed/application", r"keka\.com/careers/success/", r"[?&]success\b", r"/job_app/confirmation", r"mode=submit_apply", r"docs\.google\.com/forms/.*/formResponse",
             r"/apply/.*(thank|success|confirmation)", r"/(thank-?you|application-submitted|confirmation)(\b|/|\?)")
 PROTECT = (r"mail\.google\.com", r"youtube\.com", r"chatgpt\.com", r"claude\.ai", r"dash\.cloudflare\.com",
            r"linkedin\.com/(feed|notifications|messaging|in/)", r"naukri\.com/mnjuser", r"accounts\.google\.com")

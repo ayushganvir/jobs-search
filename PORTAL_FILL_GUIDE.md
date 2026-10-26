@@ -66,6 +66,8 @@ Facts and standing answers live in `AGENT_BRIEF.md` (read it first). The overall
 ## 9. Zoho Recruit (`*.zohorecruit.*`)
 - "I'm interested" needs a real click; image captcha at submit: fill everything, leave the captcha for Ayush. Done = "Thank you for submitting" modal (the form stays behind it) or a "join our candidate portal" email.
 
+- Zoho forms clear themselves after sitting idle (seen on nCircle, Alternative Path, Nirmitee): prefill only when Ayush is about to type the captcha, and tell him to do it soon. A form that reset needs a full refill.
+
 ## 10. Google Forms
 - Fill text fields; file upload needs Ayush (Google picker). Done = `formResponse` URL with "Your response has been recorded".
 

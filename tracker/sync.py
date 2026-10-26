@@ -227,6 +227,43 @@ def tab_for(company, url):
             return tid
     return ""
 
+PRIO = {1: "Interview / assessment", 2: "Quick submit", 3: "Needs your answers", 4: "Sign in / setup"}
+def classify_action(note, status):
+    n = (note or "").lower()
+    if status == "interview" or "interview" in n or "assessment" in n: return 1, "Interview"
+    if re.search(r"sign.?in|create account|log.?in|verify (your )?(phone|email)", n): return 4, "Sign in"
+    if re.search(r"captcha|recaptcha|click submit|submit application|apply now|attach (the )?resume|tick", n) and not re.search(r"answer|\?|references|marks|%|rate|which|how many", n): return 2, "Submit"
+    return 3, "Answer"
+
+def build_actions(apps, needs, signin):
+    """One prioritised list for the dashboard's 'Your actions' card: interviews first, then quick submits,
+    then forms waiting on Ayush's answers, then sign-ins / setup tasks (incl. manual ones in jobs/actions.json)."""
+    out = []
+    recent = (datetime.date.today() - datetime.timedelta(days=21)).isoformat()
+    for a in apps:
+        if a["status"] == "interview" and (a.get("last_update") or "") >= recent:
+            link = next((l for l in reversed(a["links"]) if "mail.google" in str(l)), "") or next((l for l in a["links"] if str(l).startswith("http")), "")
+            out.append({"priority": 1, "kind": "Interview", "company": a["company"], "title": a["title"],
+                        "detail": "Interview / assessment invite: complete it (see the email)", "go": link, "tab_id": ""})
+    for r in needs + signin:
+        u = (r.get("url") or "")
+        if r.get("status") == "blocked":
+            continue  # Claude retries these (site down etc.); not Ayush's to do
+        if re.search(r"indeed\.com|naukri\.com|wellfound\.com", u) and not r.get("tab_id"):
+            pr, kind = 4, "Via FINISH_DRAFTS prompt"  # finished by the Claude-in-Chrome finish-drafts run
+        else:
+            pr, kind = classify_action(r.get("note"), r.get("status"))
+        out.append({"priority": pr, "kind": kind, "company": r["company"], "title": r["title"], "detail": r.get("note", ""),
+                    "go": r.get("go") if r.get("tab_id") else (r.get("url") or r.get("go")), "tab_id": r.get("tab_id", "")})
+    for t in read_json(JOBS / "actions.json", []):
+        if not t.get("done"):
+            out.append({"priority": int(t.get("priority", 4)), "kind": t.get("kind", "Task"), "company": t.get("title", ""),
+                        "title": "", "detail": t.get("detail", ""), "go": t.get("link", ""), "tab_id": ""})
+    out.sort(key=lambda x: (x["priority"], x["kind"], x["company"] or ""))
+    for x in out:
+        x["priority_label"] = PRIO.get(x["priority"], "")
+    return out
+
 def build_home(apps, today):
     needs, signin = [], []
     for a in apps:
@@ -248,7 +285,7 @@ def build_home(apps, today):
     tot = len(today)
     running = read_json(JOBS / "running.json", [])
     ch = collections.Counter(a.get("channel", "pane") for a in apps if a["status"] in APPLIED)
-    return {"needs": needs, "needs_signin": signin,
+    return {"needs": needs, "needs_signin": signin, "actions": build_actions(apps, needs, signin),
             "totals": {"submitted": c["submitted"], "skipped": c["skipped"], "needs_you": len(needs) + len(signin),  # same list the Needs-you card shows
                        "queued": c["queued"], "total": c["submitted"] + c["skipped"] + len(needs) + len(signin) + c["queued"]},
             "all_time": {"applied": sum(1 for a in apps if a["status"] in APPLIED_ST), "needs_you": len(needs) + len(signin),

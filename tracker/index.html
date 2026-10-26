@@ -97,6 +97,13 @@ main{max-width:1200px;margin:auto;padding:20px 16px 48px}
 .loc svg{width:12px;height:12px;stroke:var(--mut)}
 .gw{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
 .chips .lbl{font-size:12px;color:var(--mut);font-weight:600;align-self:center;margin-right:2px;min-width:58px}
+/* priority actions */
+.pgrp{margin:6px 0 14px}.pgh{display:flex;gap:8px;align-items:center;font-weight:600;margin:4px 0 6px}
+.pbadge{display:inline-block;min-width:26px;text-align:center;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:var(--pc,#64748b)}
+.p1{--pc:#dc2626}.p2{--pc:#f59e0b}.p3{--pc:#0ea5e9}.p4{--pc:#64748b}
+.pact{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line,rgba(127,127,127,.18))}
+.pact .pm{flex:1;min-width:0}.pact .pt{font-weight:600}.pact .pd{font-size:13px;opacity:.8;margin-top:2px;overflow-wrap:anywhere}
+.pkind{font-size:12px;padding:1px 6px;border-radius:6px;border:1px solid var(--line,rgba(127,127,127,.3));margin-left:6px;font-weight:500}
 /* needs */
 .need-act{display:flex;gap:6px;align-items:flex-start;flex-shrink:0}.btn-go{font-weight:600}.btn-ghost{opacity:.7}
 .needs-card{border-color:var(--warn-bd);background:linear-gradient(180deg,var(--warn-bg),var(--surface) 140px)}
@@ -388,6 +395,10 @@ details.nu[open] summary::before{transform:rotate(45deg)}
 <section id="v-home" data-view aria-labelledby="t-home">
  <div class="grid g4" id="hkpi"></div>
  <div class="run" id="hrun" aria-live="polite"></div>
+ <div class="card needs-card" id="pact">
+  <div class="card-h"><h2>Your actions, by priority</h2><span class="mut" id="pactc"></span></div>
+  <div id="pacts"></div>
+ </div>
  <div class="grid g-main">
   <div class="card needs-card" id="action">
    <div class="card-h"><h2>Needs you now</h2><span class="mut" id="hneedc"></span></div>
@@ -538,6 +549,9 @@ function renderHome(){
  const nk=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
  const look=r=>(r.location!==undefined||r.work_mode!==undefined)?r:(D.find(a=>nk(a.company)===nk(r.company)&&nk(a.title)===nk(r.title))||{});
  const grp=(rows,pre)=>["chrome","browser","link"].map(b=>{const g=rows.filter(r=>r.badge===b);return g.length?`<div class="ngroup"><div class="ngh">${badge(b)}<span>${g.length} item${g.length>1?"s":""}</span></div>`+g.map(r=>`<div class="need">${av(r.company,1)}<div class="need-main"><div class="need-t">${esc(r.company)} <span class="role">· ${esc(r.title)}</span></div><div class="need-meta">${pill(r.status)}${wmPill(look(r))}${locH(look(r).location)}${pre&&r.portal?`<span class="pill plain st-queued">${esc(r.portal)}</span>`:""}${r.site&&!(pre&&r.portal===r.site)?`<span class="mut">${esc(r.site)}</span>`:""}</div>${r.where?`<span class="where">${esc(r.where)}</span>`:""}${r.note?`<div class="note">${esc(r.note)}</div>`:""}</div><div class="need-act">${r.go?`<a class="btn btn-go" href="${esc(r.go)}" target="_blank" rel="noopener" title="${r.tab_id?"Bring the filled Chrome tab to the front":"No open tab found: opens the job page"}">${r.tab_id?"Go to tab":"Open job"} <span aria-hidden="true">→</span></a>`:""}${isUrl(r.url)&&r.tab_id?`<a class="btn btn-ghost" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open a fresh copy (loses filled fields)">↗</a>`:""}</div></div>`).join("")+"</div>":""}).join("");
+ const ACT=H.actions||[],PLB={1:"Interview / assessment",2:"Quick submit",3:"Needs your answers",4:"Sign in / setup / prompts"};
+ $("pactc").textContent=ACT.length?ACT.length+" open":"";
+ $("pacts").innerHTML=ACT.length?[1,2,3,4].map(p=>{const g=ACT.filter(x=>x.priority===p);return g.length?`<div class="pgrp"><div class="pgh"><span class="pbadge p${p}">P${p}</span>${PLB[p]} <span class="mut">${g.length}</span></div>`+g.map(x=>`<div class="pact"><div class="pm"><div class="pt">${esc(x.company)}${x.title?` <span class="role">· ${esc(x.title)}</span>`:""}<span class="pkind">${esc(x.kind)}</span></div>${x.detail?`<div class="pd">${esc(x.detail)}</div>`:""}</div>${x.go&&!/tab=&u=$/.test(x.go)?`<a class="btn btn-go" href="${esc(x.go)}" target="_blank" rel="noopener">${x.tab_id?"Go to tab":"Open"} <span aria-hidden="true">→</span></a>`:""}</div>`).join("")+"</div>":""}).join(""):empty("Nothing needs you right now","ok");
  $("hneeds").innerHTML=grp(needs,false)||empty("Nothing needs you right now","ok");
  $("hsign").innerHTML=grp(sign,true)||empty("No sign-ins pending","ok");
  $("hneedc").textContent=allN.length?allN.length+" open":"";
